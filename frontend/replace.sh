@@ -1,0 +1,4 @@
+sed s#{{REACT_APP_ENGINE_HTTP_URL}}#"$ODEX_ENGINE_HTTP_URL"#g config-template.js |
+sed s#{{REACT_APP_ENGINE_WS_URL}}#"$ODEX_ENGINE_WS_URL"#g |
+sed s#{{REACT_APP_MIXPANEL_TOKEN}}#"$ODEX_MIXPANEL_TOKEN"#g |
+sed s#{{REACT_APP_DEFAULT_NETWORK_ID}}#"$ODEX_DEFAULT_NETWORK_ID"#g > /usr/share/nginx/html/env.js

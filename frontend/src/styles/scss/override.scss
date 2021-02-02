@@ -1,0 +1,78 @@
+@import "vars";
+
+// Adapting the steps package to the blueprint dark theme
+.rc-steps-item-icon {
+  border: 1px solid $pt-dark-divider-black !important;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 26px;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.rc-steps-item-title {
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: $white !important;
+  font-weight: bold;
+  display: inline-block;
+  padding-right: 10px;
+  position: relative;
+}
+
+.rc-steps-item-wait .rc-steps-item-title {
+  color: rgba(0, 0, 0, 0.43);
+}
+
+.rc-steps-item-wait .rc-steps-item-icon {
+  border-color: #ccc;
+  background-color: $dark-gray5 !important;
+}
+
+.rc-steps-item-process .rc-steps-item-title {
+  color: rgba(0, 0, 0, 0.43);
+}
+
+.rc-steps-item-process .rc-steps-item-icon {
+  background: $pt-intent-primary !important;
+}
+
+.rc-steps-item-process .rc-steps-item-title {
+  color: rgba(0, 0, 0, 0.43);
+}
+
+.rc-steps-item-finish .rc-steps-item-icon {
+  border-color: $pt-intent-primary !important;
+  background-color: $dark-gray5 !important;
+}
+
+.rc-steps-item-finish .rc-steps-item-icon > .rc-steps-icon {
+  border-color: $pt-intent-primary !important;
+  color: $pt-intent-primary !important;
+  background-color: $dark-gray5 !important;
+  font-weight: bolder;
+}
+
+.rc-steps-item-wait .rc-steps-item-icon > .rc-steps-icon {
+  color: #ccc;
+}
+
+.react-resizable {
+  position: relative;
+}
+.react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
+  background-position: bottom right;
+  padding: 0 3px 3px 0;
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  box-sizing: border-box;
+  cursor: se-resize;
+}

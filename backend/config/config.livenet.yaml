@@ -1,0 +1,27 @@
+
+
+# redis: redis://localhost:6379
+
+RABBITMQ_URL: localhost
+MONGODB_URL: localhost
+MONGODB_DBNAME: odex
+ENABLE_TLS: "false"
+SERVER_PORT: 8080
+
+OBYTE_NODE_HTTP_URL: http://localhost:6333
+OBYTE_NODE_WS_URL: ws://localhost:6333
+
+
+logs:
+  main: './main.log'
+  engine: './engine.log'
+  operator: './operator.log'
+
+tick_duration:
+    sec: [5, 30]
+    min: [1, 5, 15]
+    hour: [1]
+    day: [1]
+    week: [1]
+    month: [1, 3, 6, 9]
+    year: [1]

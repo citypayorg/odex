@@ -1,0 +1,337 @@
+// @flow
+import React from 'react';
+import styled from 'styled-components';
+import { formatNumber } from 'accounting-js'
+import { relativeDate } from '../../utils/helpers'
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
+
+import { 
+  Loading, 
+  Colors, 
+  Text, 
+  CenteredMessage,
+  SmallText,
+  Hideable,
+  FlexRow
+} from '../Common';
+
+import { 
+  Icon, 
+  Button, 
+  Card, 
+  Tabs, 
+  Tab, 
+  Collapse
+} from '@blueprintjs/core';
+
+import type { Node } from 'react'
+import type { Trade } from '../../types/trades';
+import type { TokenPair } from '../../types/tokens';
+import type { DisplayMode } from '../../types/account'
+import { AutoSizer } from 'react-virtualized'
+
+type Props = {
+  selectedTabId: string,
+  currentPair: TokenPair,
+  onChange: string => void,
+  trades: Array<Trade>,
+  userTrades: Array<Trade>,
+  toggleCollapse: (SyntheticEvent<>) => void,
+  openExplorerLink: string => void,
+  isOpen: boolean,
+  expand: SyntheticEvent<> => void,
+  onContextMenu: void => Node,
+  authenticated: boolean,
+  displayMode: DisplayMode,
+};
+
+const TradesTableRenderer = (props: Props) => {
+  const { 
+    currentPair, 
+    isOpen, 
+    selectedTabId, 
+    onChange, 
+    trades, 
+    userTrades, 
+    toggleCollapse,
+    openExplorerLink,
+    expand,
+    onContextMenu,
+    authenticated,
+    displayMode
+  } = props;
+
+  return (
+    <AutoSizer style={{ width: '100%', height: '100%' }}>
+        {({ width, height }) => (
+          <CardBox onContextMenu={onContextMenu}>
+            <TradesTableHeader>
+              <Heading>
+                Trades
+                <Text muted>
+                  {' '}
+                  ({currentPair.baseTokenSymbol} / {currentPair.quoteTokenSymbol})
+                </Text>
+              </Heading>
+              <FlexRow>
+              <Button
+                icon='zoom-to-fit'
+                minimal
+                onClick={expand}
+                small
+              />
+              <Button 
+                icon='move' 
+                className="drag" 
+                minimal 
+                small
+              />
+              <Button 
+                icon={isOpen ? 'chevron-up' : 'chevron-down'}
+                minimal 
+                onClick={toggleCollapse}
+                small
+              />
+              </FlexRow>
+            </TradesTableHeader>
+            <Wrapper>
+              <Collapse isOpen={isOpen}>
+                <Tabs 
+                  selectedTabId={selectedTabId} 
+                  onChange={onChange}
+                >
+                  <Tab 
+                    id="Market"
+                    title="Market"
+                    panel={
+                      <MarketTradesPanel 
+                        trades={trades} 
+                        openExplorerLink={openExplorerLink}
+                        width={width}
+                        displayMode={displayMode}
+                      />
+                    }
+                  />
+                  <Tab
+                    id="User"
+                    title="User"
+                    panel={
+                      <UserTradesPanel 
+                        trades={userTrades}
+                        openExplorerLink={openExplorerLink}
+                        width={width}
+                        authenticated={authenticated}
+                      />
+                    }
+                  />
+                </Tabs>
+              </Collapse>
+            </Wrapper>
+          </CardBox>
+        )}
+      </AutoSizer>
+  )
+};
+
+const MarketTradesPanel = (props: *) => {
+  let { trades, openExplorerLink, width, displayMode } = props;
+
+  if (!trades) return <Loading />
+  trades = trades.filter(trade => ["SUCCESS", "COMMITTED"].includes(trade.status))
+  if (trades.length === 0) return <CenteredMessage message="No trades for this token pair" />
+
+  return (
+      <React.Fragment>
+        <ListHeader>
+          <HeadingRow>
+            <HeaderCell>{ displayMode.priceAlias }</HeaderCell>
+            <HeaderCell>{ displayMode.amountAlias }</HeaderCell>
+            <Hideable hiddenIf={width < 600}>
+              <HeaderCell >STATUS</HeaderCell>
+            </Hideable>
+            <Hideable hiddenIf={width < 400}>
+              <HeaderCell cellName="time">TIME</HeaderCell>
+            </Hideable>
+          </HeadingRow>
+        </ListHeader>
+        <ListBody>
+        <ReactCSSTransitionGroup transitionName="flash-buy" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+          {trades.map((trade, index) => (
+            <Row 
+              color={trade.change === 'positive' ? Colors.BUY_MUTED : Colors.SELL_MUTED} 
+              key={trade.hash}
+              onClick={() => openExplorerLink(trade.txHash)}
+              >
+                <Cell color={trade.change === 'positive' ? Colors.BUY : Colors.SELL}>
+                <Icon icon={trade.change === 'positive' ? 'chevron-up' : 'chevron-down'} iconSize={14}/>
+                <SmallText color={trade.change === 'positive' ? Colors.BUY : Colors.SELL}>
+                  {formatNumber(displayMode.name === 'Price' ? trade.price : 1 / trade.price, { precision: 5 })}
+                </SmallText>
+              </Cell>
+              <Cell>
+                <SmallText muted>
+                  {formatNumber(displayMode.name === 'Price' ? trade.amount : trade.amount * trade.price, { precision: 3 })}
+                </SmallText>
+              </Cell>
+              <Hideable hiddenIf={width < 600}>
+                <Cell>
+                  <SmallText muted>{trade.status}</SmallText>
+                </Cell>
+              </Hideable>
+              <Hideable hiddenIf={width < 400}>
+                <Cell cellName="time">
+                  <SmallText muted>{relativeDate(trade.time)}</SmallText>
+                </Cell>
+              </Hideable>
+            </Row>
+          ))}
+        </ReactCSSTransitionGroup>
+        </ListBody>
+      </React.Fragment>
+  );
+};
+
+const UserTradesPanel = (props: *) => {
+  let { trades, width, authenticated } = props;
+
+  if (!trades) return <Loading />
+  if (!authenticated) return <CenteredMessage message="Not logged in" />
+  trades = trades.filter(trade => ["SUCCESS", "COMMITTED"].includes(trade.status))
+  if (trades.length === 0) return <CenteredMessage message="No trades for this token pair" />
+
+  return (
+    <React.Fragment>
+      <ListHeader>
+        <HeadingRow>
+          <HeaderCell>PRICE</HeaderCell>
+          <HeaderCell>AMOUNT</HeaderCell>
+          <Hideable hiddenIf={width < 500}> 
+            <HeaderCell>STATUS</HeaderCell>
+          </Hideable>
+          <HeaderCell cellName="time">TIME</HeaderCell>
+        </HeadingRow>
+      </ListHeader>
+      <ListBody>
+      <ReactCSSTransitionGroup transitionName="flash-buy" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+        {trades.map((trade, index) => (
+          <Row color={trade.status === 'EXECUTED' ? Colors.BUY_MUTED : Colors.SELL_MUTED} key={trade.hash}>
+            <Cell>
+              <SmallText muted>
+                {formatNumber( trade.price, { precision: 5 })}
+              </SmallText>
+            </Cell>
+            <Cell>
+              <SmallText muted>
+                {formatNumber(trade.amount, { precision: 3 })}
+              </SmallText>
+            </Cell>
+            <Hideable hiddenIf={width < 500}>
+              <Cell>
+                <SmallText muted>{trade.status}</SmallText>
+              </Cell>
+            </Hideable>
+            <Cell cellName="time">
+              <SmallText muted>{relativeDate(trade.time)}</SmallText>
+            </Cell>
+          </Row>
+        ))}
+      </ReactCSSTransitionGroup>
+      </ListBody>
+    </React.Fragment>
+  );
+};
+
+const TradesTableHeader = styled.div`
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: space-between;
+  grid-gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const Wrapper = styled.div`
+  overflow-y: auto;
+  overflow-x: hidden;
+`
+
+const Heading = styled.h3`
+  margin: auto;
+`;
+
+const CardBox = styled(Card)`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ListHeader = styled.ul`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 0px;
+  padding-left: 0px !important;
+  margin-left: 0px !important;
+`;
+
+const ListBody = styled.ul`
+  height: 90%;
+  margin: 0;
+  padding-left: 0px !important;
+  margin-left: 0px !important;
+`;
+
+const HeadingRow = styled.li`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+  justify-content: space-between;
+  padding-left: 10px;
+  padding-left: 0px !important;
+  margin-left: 0px !important;
+`;
+
+const Row = styled.li.attrs({
+  className: 'row',
+})`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  border: 1px transparent;
+  border-radius: 2px;
+  box-shadow: inset 0px 1px 0 0 rgba(16, 22, 26, 0.15);
+  padding: 7px;
+  margin-left: 0px !important;
+  padding-left: 10px !important;
+  background-color: ${props => props.color};
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${Colors.BLUE_MUTED};
+    position: relative;
+    border-radius: 3px;
+    -webkit-box-shadow: inset 0 0 0 1px rgb(49, 64, 76), -1px 10px 4px rgba(16, 22, 26, 0.1),
+      1px 18px 24px rgba(16, 22, 26, 0.2);
+    box-shadow: inset 0 0 0 1px rgb(49, 64, 76), -1px 5px 4px rgba(16, 22, 26, 0.1), 1px 7px 24px rgba(16, 22, 26, 0.2);
+    z-index: 1;
+  }
+
+`;
+
+const Cell = styled.span`
+  color: ${props => props.color ? props.color : Colors.TEXT_MUTED};
+  min-width: 100px;
+  width: ${props => (props.cellName === 'time' ? '20%' : '15%')};  
+`;
+
+const HeaderCell = styled.span`
+  min-width: 100px;
+  width: ${props => (props.cellName === 'time' ? '20%' : '15%')};
+`;
+
+export default TradesTableRenderer;
