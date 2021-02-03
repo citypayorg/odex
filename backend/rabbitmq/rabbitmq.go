@@ -46,8 +46,8 @@ func NewConnection() *amqp.Connection {
 		Scheme:   "amqp",
 		Host:     app.Config.RabbitMQURL,
 		Port:     5672,
-		Username: "guest",
-		Password: "guest",
+		Username: "admin",
+		Password: "admin2021",
 	}
 
 	conn, err := amqp.Dial(uri.String())

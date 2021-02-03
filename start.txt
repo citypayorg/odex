@@ -13,6 +13,26 @@ Copy `.env.testnet` file to `.env` if you are working on testnet.
 exports.admin_email = 'www.usm.best@gmail.com';
 exports.from_email = 'www.usm.best@gmail.com';
 ---------------
+/home/dev/odex/backend/app/config.go
+		Config.MongoDBUsername = "admin"
+		Config.MongoDBPassword = "admin2021"
+		Config.RabbitMQUsername = "guest"
+		Config.RabbitMQPassword = "guest"
+test db ==>  odex_test
+---------------
+
+/home/dev/odex/mongodb_docker-compose.yml
+cd /home/dev/odex/
+sudo docker-mongodb_docker-compose up -d
+
+docker exec -it mongo bash
+docker exec -it 9d7829fe166f6065af26967d83ed732c20a3fafaf72db4becf36b763e5a1ca7f bash 
+use admin
+db.createUser({ user: "admin" , pwd: "admin2021", roles: ["userAdminAnyDatabase", "dbAdminAnyDatabase", "readWriteAnyDatabase"]})
+use odex_test
+db.createUser({user:"admin",pwd:"admin2021",roles:[{role:"clusterManager",db:"admin"},{role:"dbOwner", db:"odex"},{role:"readWrite", db:"departmentblog"},{role:"read", db:"odex_test"}]})
+
+---------------
 node run.js
 node run.js 1>log 2>errlog &
 ----------------------------
@@ -21,10 +41,16 @@ apt-get install sendmail
 ----------------------------
 ----------------------------
 cd backend
+go run main.go
+
+    chrome RabbitMQ 3.8.11 Erlang 23.2.3
+    http://localhost:15672/ 
 ----------------------------
 docker run -d --hostname my-rabbit --name some-rabbit rabbitmq:3
 docker run -d --hostname rabbitmq --name rabbit-server -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=admin2021 -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-docker run -d --name mongo-db -v /data:/data/db -p 27017:27017 mongo:3.7.7
+--docker run -d --name mongo-db -v /data:/data/db -p 27017:27017 mongo:3.7.7
+
+sudo docker-compose up -d
 
 /home/dev/Downloads
 tar -C /usr/local -xzf go1.15.7.linux-amd64.tar.gz
@@ -39,6 +65,7 @@ sh start-local-testnet.sh
 ```
 go get github.com/byteball/odex-backend
 ```
+go run main.go
 go get gopkg.in/yaml.v2
 
 
@@ -65,3 +92,26 @@ https://github.com/byteball/rpcify.git
 
 original code 
 https://github.com/byteball
+
+
+
+
+
+
+
+
+
+----------------------------
+- send mail log
+----------------------------
+Everything you need to support STARTTLS (encrypted mail transmission
+and user authentication via certificates) is installed and configured
+but is *NOT* being used.
+
+To enable sendmail to use STARTTLS, you need to:
+1) Add this line to /etc/mail/sendmail.mc and optionally
+   to /etc/mail/submit.mc:
+  include(`/etc/mail/tls/starttls.m4')dnl
+2) Run sendmailconfig
+3) Restart sendmail
+

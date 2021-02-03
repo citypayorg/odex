@@ -41,7 +41,8 @@ func setupTest() (
 
 	session := mongoServer.Session()
 	daos.InitSession(session)
-	rabbitConn := rabbitmq.InitConnection("amqp://guest:guest@localhost:5672/")
+	// rabbitConn := rabbitmq.InitConnection("amqp://guest:guest@localhost:5672/")
+	rabbitConn := rabbitmq.InitConnection("amqp://admin:admin2021@localhost:5672/")
 
 	opts := daos.OrderDaoDBOption("test")
 	orderDao := daos.NewOrderDao(opts)

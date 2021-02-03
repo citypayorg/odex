@@ -8,8 +8,10 @@ services:
       - ODEX_MONGO_URL=mongodb
       - ODEX_MONGO_DBNAME
       - ODEX_REDIS_URL=redis://redis:6379
-      - ODEX_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-    depends_on:
+#      - ODEX_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - ODEX_RABBITMQ_URL=amqp://admin:admin2021@rabbitmq:5672
+
+      depends_on:
       - mongodb
       - rabbitmq
       - redis
@@ -19,6 +21,8 @@ services:
     container_name: "mongodb"
     ports:
       - '27017:27017'
+    env_file:
+      - .env
 
   rabbitmq:
     image: rabbitmq
